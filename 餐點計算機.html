@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>點單</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 10px;
+    }
+
+    /* 🔥 頂部 */
+    .top-bar {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    /* 🔥 總金額放大 */
+    .total {
+      font-size: 40px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .clear-btn {
+      width: 100%;
+      background: #f44336;
+      padding: 14px;
+      font-size: 18px;
+      border-radius: 8px;
+      color: white;
+      border: none;
+    }
+
+    /* 🔥 三欄 */
+    .menu {
+      max-width: 900px;
+      margin: auto;
+
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      /* ⭐ 三欄 */
+      gap: 10px;
+    }
+
+    .group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 15px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .sub {
+      margin-top: 5px;
+      margin-left: 6px;
+      background: #fafafa;
+    }
+
+    .top {
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 🔥 +1 放大 */
+    button {
+      padding: 14px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #ff9800;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .count {
+      font-size: 20px;
+      min-width: 25px;
+      text-align: center;
+    }
+
+    /* 📱 手機：仍三欄（強制） */
+    @media (max-width: 600px) {
+      .menu {
+        grid-template-columns: repeat(3, 1fr);
+        /* ⭐ 不變三欄 */
+      }
+
+      .item {
+        font-size: 12px;
+        padding: 8px;
+      }
+
+      button {
+        padding: 12px 14px;
+        font-size: 16px;
+      }
+
+      .total {
+        font-size: 44px;
+      }
+
+      .count {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-bar">
+    <div class="total">
+      總金額：<span id="total">0</span> 元
+    </div>
+    <button class="clear-btn" onclick="clearOrder()">清空訂單</button>
+  </div>
+
+  <div class="menu" id="menu"></div>
+
+  <script>
+
+    const menuData = [
+      { name: "雞翅", price: 25, options: [{ name: "五隻100", price: 100 }] },
+      { name: "雞腿", price: 45 },
+      { name: "腿排", price: 35, options: [{ name: "三隻100", price: 100 }] },
+      { name: "柳葉魚", price: 15, options: [{ name: "四隻50", price: 50 }] },
+
+      { name: "花枝丸", price: 15 },
+      { name: "香腸", price: 25 },
+      { name: "雞塊", price: 35 },
+      { name: "個人套餐", price: 100 },
+      { name: "全餐套餐", price: 150 }
+    ];
+
+    let order = {};
+
+    function renderMenu() {
+      const menuDiv = document.getElementById("menu");
+
+      menuData.forEach(item => {
+
+        const group = document.createElement("div");
+        group.className = "group";
+
+        order[item.name] = 0;
+
+        const div = document.createElement("div");
+        div.className = "item";
+
+        div.innerHTML = `
+      <div class="top"><strong>${item.name}</strong></div>
+      <div>${item.price}元</div>
+      <div class="bottom">
+        <button onclick="addItem('${item.name}', ${item.price})">+1</button>
+        <span class="count" id="${item.name}">0</span>
+      </div>
+    `;
+
+        group.appendChild(div);
+
+        if (item.options) {
+          item.options.forEach(opt => {
+
+            order[opt.name] = 0;
+
+            const subDiv = document.createElement("div");
+            subDiv.className = "item sub";
+
+            subDiv.innerHTML = `
+          <div class="top">↳ ${opt.name}</div>
+          <div>${opt.price}元</div>
+          <div class="bottom">
+            <button onclick="addItem('${opt.name}', ${opt.price})">+1</button>
+            <span class="count" id="${opt.name}">0</span>
+          </div>
+        `;
+
+            group.appendChild(subDiv);
+          });
+        }
+
+        menuDiv.appendChild(group);
+      });
+    }
+
+    function addItem(name, price) {
+      order[name]++;
+      document.getElementById(name).innerText = order[name];
+      updateTotal();
+    }
+
+    function updateTotal() {
+      let total = 0;
+
+      menuData.forEach(item => {
+        total += order[item.name] * item.price;
+
+        if (item.options) {
+          item.options.forEach(opt => {
+            total += order[opt.name] * opt.price;
+          });
+        }
+      });
+
+      document.getElementById("total").innerText = total;
+    }
+
+    function clearOrder() {
+      for (let key in order) {
+        order[key] = 0;
+        document.getElementById(key).innerText = 0;
+      }
+      updateTotal();
+    }
+
+    renderMenu();
+
+  </script>
+
+</body>
+
+</html>
