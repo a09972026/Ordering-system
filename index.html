@@ -9,7 +9,7 @@
 
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: #f5f5f5;
       margin: 0;
       padding: 10px;
@@ -21,27 +21,34 @@
       margin: auto;
       background: white;
       padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       margin-bottom: 10px;
       text-align: center;
     }
 
-    /* 🔥 總金額放大 */
+    /* 🔥 總金額 */
     .total {
-      font-size: 40px;
+      font-size: 42px;
       font-weight: bold;
       margin-bottom: 10px;
+      color: #222;
     }
 
+    /* 🔥 清空按鈕 */
     .clear-btn {
       width: 100%;
-      background: #f44336;
-      padding: 14px;
-      font-size: 18px;
-      border-radius: 8px;
-      color: white;
       border: none;
+      border-radius: 10px;
+      background: #f44336;
+      color: white;
+      padding: 14px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .clear-btn:active {
+      transform: scale(0.98);
     }
 
     /* 🔥 三欄 */
@@ -51,7 +58,6 @@
 
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      /* ⭐ 三欄 */
       gap: 10px;
     }
 
@@ -60,187 +66,308 @@
       flex-direction: column;
     }
 
+    /* 🔥 商品卡片（整塊可點） */
     .item {
       background: white;
+      border-radius: 12px;
       padding: 10px;
-      border-radius: 10px;
-      font-size: 15px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+      cursor: pointer;
+      transition: 0.1s;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      min-height: 110px;
     }
 
+    /* 🔥 點擊動畫 */
+    .item:active {
+      transform: scale(0.95);
+      background: #ffe0b2;
+    }
+
+    /* 子選項 */
     .sub {
       margin-top: 5px;
       margin-left: 6px;
       background: #fafafa;
     }
 
+    /* 品名 */
     .top {
-      font-size: 15px;
-      margin-bottom: 5px;
-    }
-
-    .bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* 🔥 +1 放大 */
-    button {
-      padding: 14px 18px;
-      border: none;
-      border-radius: 10px;
-      background: #ff9800;
-      color: white;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
+      margin-bottom: 5px;
+      color: #222;
     }
 
-    button:active {
-      transform: scale(0.95);
+    /* 價格 */
+    .price {
+      font-size: 14px;
+      color: #666;
     }
 
+    /* 🔥 數量 */
     .count {
-      font-size: 20px;
-      min-width: 25px;
-      text-align: center;
+      margin-top: 10px;
+      font-size: 32px;
+      font-weight: bold;
+      text-align: right;
+      color: #ff9800;
     }
 
-    /* 📱 手機：仍三欄（強制） */
+    /* 📱 手機 */
     @media (max-width: 600px) {
+
       .menu {
         grid-template-columns: repeat(3, 1fr);
-        /* ⭐ 不變三欄 */
       }
 
       .item {
-        font-size: 12px;
+        min-height: 90px;
         padding: 8px;
       }
 
-      button {
-        padding: 12px 14px;
-        font-size: 16px;
+      .top {
+        font-size: 12px;
       }
 
-      .total {
-        font-size: 44px;
+      .price {
+        font-size: 11px;
       }
 
       .count {
-        font-size: 16px;
+        font-size: 24px;
+      }
+
+      .total {
+        font-size: 38px;
       }
     }
+
   </style>
 </head>
 
 <body>
 
+  <!-- 🔥 上方 -->
   <div class="top-bar">
+
     <div class="total">
       總金額：<span id="total">0</span> 元
     </div>
-    <button class="clear-btn" onclick="clearOrder()">清空訂單</button>
+
+    <button class="clear-btn" onclick="clearOrder()">
+      清空訂單
+    </button>
+
   </div>
 
+  <!-- 🔥 商品區 -->
   <div class="menu" id="menu"></div>
 
   <script>
 
     const menuData = [
-      { name: "雞翅Wings", price: 25, options: [{ name: "五隻100", price: 100 }] },
-      { name: "雞腿Drumstick", price: 45 },
-      { name: "腿排Thigh", price: 35, options: [{ name: "三隻100", price: 100 }] },
-      { name: "柳葉魚Fried fish", price: 15, options: [{ name: "四隻50", price: 50 }] },
 
-      { name: "花枝丸squid ball", price: 15 },
-      { name: "香腸Sausage", price: 25 },
-      { name: "雞塊Nugets", price: 35 },
-      { name: "個人套餐combo", price: 100 },
-      { name: "全餐套餐combo2", price: 150 }
+      {
+        name: "雞翅 Wings",
+        price: 25,
+        options: [
+          { name: "五隻100", price: 100 }
+        ]
+      },
+
+      {
+        name: "雞腿 Drumstick",
+        price: 45
+      },
+
+      {
+        name: "腿排 Thigh",
+        price: 35,
+        options: [
+          { name: "三隻100", price: 100 }
+        ]
+      },
+
+      {
+        name: "柳葉魚 Fried fish",
+        price: 15,
+        options: [
+          { name: "四隻50", price: 50 }
+        ]
+      },
+
+      {
+        name: "花枝丸 Squid ball",
+        price: 15
+      },
+
+      {
+        name: "香腸 Sausage",
+        price: 25
+      },
+
+      {
+        name: "雞塊 Nuggets",
+        price: 35
+      },
+
+      {
+        name: "個人套餐 Combo",
+        price: 100
+      },
+
+      {
+        name: "全餐套餐 Combo2",
+        price: 150
+      }
+
     ];
 
     let order = {};
 
+    // 🔥 建立畫面
     function renderMenu() {
-      const menuDiv = document.getElementById("menu");
+
+      const menuDiv =
+        document.getElementById("menu");
 
       menuData.forEach(item => {
 
-        const group = document.createElement("div");
+        const group =
+          document.createElement("div");
+
         group.className = "group";
 
         order[item.name] = 0;
 
-        const div = document.createElement("div");
+        // 🔥 主商品
+        const div =
+          document.createElement("div");
+
         div.className = "item";
 
+        // ⭐ 整塊可按
+        div.onclick = () =>
+          addItem(item.name, item.price);
+
         div.innerHTML = `
-      <div class="top"><strong>${item.name}</strong></div>
-      <div>${item.price}元</div>
-      <div class="bottom">
-        <button onclick="addItem('${item.name}', ${item.price})">+1</button>
-        <span class="count" id="${item.name}">0</span>
-      </div>
-    `;
+          <div class="top">
+            ${item.name}
+          </div>
+
+          <div class="price">
+            ${item.price} 元
+          </div>
+
+          <div class="count"
+            id="${item.name}">
+            0
+          </div>
+        `;
 
         group.appendChild(div);
 
+        // 🔥 子選項
         if (item.options) {
+
           item.options.forEach(opt => {
 
             order[opt.name] = 0;
 
-            const subDiv = document.createElement("div");
-            subDiv.className = "item sub";
+            const subDiv =
+              document.createElement("div");
+
+            subDiv.className =
+              "item sub";
+
+            // ⭐ 整塊可按
+            subDiv.onclick = () =>
+              addItem(opt.name, opt.price);
 
             subDiv.innerHTML = `
-          <div class="top">↳ ${opt.name}</div>
-          <div>${opt.price}元</div>
-          <div class="bottom">
-            <button onclick="addItem('${opt.name}', ${opt.price})">+1</button>
-            <span class="count" id="${opt.name}">0</span>
-          </div>
-        `;
+              <div class="top">
+                ↳ ${opt.name}
+              </div>
+
+              <div class="price">
+                ${opt.price} 元
+              </div>
+
+              <div class="count"
+                id="${opt.name}">
+                0
+              </div>
+            `;
 
             group.appendChild(subDiv);
+
           });
         }
 
         menuDiv.appendChild(group);
+
       });
     }
 
+    // 🔥 增加商品
     function addItem(name, price) {
+
       order[name]++;
-      document.getElementById(name).innerText = order[name];
+
+      document.getElementById(name)
+        .innerText = order[name];
+
       updateTotal();
     }
 
+    // 🔥 更新總價
     function updateTotal() {
+
       let total = 0;
 
       menuData.forEach(item => {
-        total += order[item.name] * item.price;
+
+        total +=
+          order[item.name] * item.price;
 
         if (item.options) {
+
           item.options.forEach(opt => {
-            total += order[opt.name] * opt.price;
+
+            total +=
+              order[opt.name] * opt.price;
+
           });
         }
+
       });
 
-      document.getElementById("total").innerText = total;
+      document.getElementById("total")
+        .innerText = total;
     }
 
+    // 🔥 清空
     function clearOrder() {
+
       for (let key in order) {
+
         order[key] = 0;
-        document.getElementById(key).innerText = 0;
+
+        document.getElementById(key)
+          .innerText = 0;
       }
+
       updateTotal();
     }
 
+    // 初始化
     renderMenu();
 
   </script>
